@@ -1,0 +1,41 @@
+---
+- name: Install Jenkins on Azure VM
+  hosts: all
+  become: yes  # Use sudo to run tasks as root
+  tasks:
+
+    - name: Update apt repository cache
+      apt:
+        update_cache: yes
+
+    - name: Install Java (required by Jenkins)
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Download Jenkins repository key
+      ansible.builtin.apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+
+    - name: Add Jenkins repository with signed-by option
+      ansible.builtin.apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Open port 8080 for Jenkins
+      ufw:
+        rule: allow
+        port: 8080
+        proto: tcp

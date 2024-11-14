@@ -61,6 +61,18 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 }
 
+resource "terraform_data" "provision" {
+  depends_on = [azurerm_linux_virtual_machine.vm]
+
+  provisioner "local-exec" {
+    command     = "ansible-playbook -i \"${azurerm_linux_virtual_machine.vm.public_ip_address},\" -e 'ansible_user=azureuser' jenkins.yml"
+    working_dir = "${path.module}/provision"
+    environment = {
+      ANSIBLE_HOST_KEY_CHECKING = "False"
+    }
+  }
+}
+
 resource "azurerm_public_ip" "jenkins_pip" {
   name                = "jenkins-public-ip"
   location            = var.resource_group_location
