@@ -16,3 +16,15 @@ variable "key_vault_id" {
   description = "Common key vault ID to store secrets"
   type        = string
 }
+
+variable "vm_username" {
+  description = "Virtual Machine username"
+  type        = string
+  default     = "azureuser"
+}
+
+variable "pem_filename" {
+  description = "File name for Jenkins server private SSH key"
+  type        = string
+  default     = "jenkins-server.pem"
+}

@@ -3,10 +3,10 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
   size                = "Standard_DS1_v2"
-  admin_username      = "azureuser"
+  admin_username      = var.vm_username
 
   admin_ssh_key {
-    username   = "azureuser"
+    username   = var.vm_username
     public_key = azapi_resource_action.ssh_public_key_gen.output.publicKey
   }
 
@@ -26,7 +26,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 resource "local_file" "private_key_file" {
   depends_on = [azurerm_key_vault_secret.private_key]
 
-  filename = "${path.module}/provision/jenkins-server.pem"
+  filename = "${path.module}/provision/${var.pem_filename}"
   content  = azurerm_key_vault_secret.private_key.value
 
   file_permission = "0600" # Ensure the key file is secure
@@ -38,8 +38,8 @@ resource "terraform_data" "provision" {
   provisioner "local-exec" {
     command     = <<EOT
       ansible-playbook -i "${azurerm_linux_virtual_machine.vm.public_ip_address}," \
-                       -e 'ansible_user=azureuser' \
-                       --private-key ./jenkins-server.pem \
+                       -e "ansible_user=${var.vm_username}" \
+                       --private-key ./${var.pem_filename} \
                        jenkins.yml
     EOT
     working_dir = "${path.module}/provision"
@@ -47,8 +47,4 @@ resource "terraform_data" "provision" {
       ANSIBLE_HOST_KEY_CHECKING = "False"
     }
   }
-}
-
-output key_data {
-  value = azapi_resource_action.ssh_public_key_gen.output.publicKey
 }
