@@ -28,11 +28,81 @@
         name: jenkins
         state: present
 
-    - name: Start Jenkins service
+    - name: Create systemd override directory for Jenkins
+      file:
+        path: /etc/systemd/system/jenkins.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create systemd override configuration to skip setup wizard
+      copy:
+        dest: /etc/systemd/system/jenkins.service.d/override.conf
+        content: |
+          [Service]
+          Environment="JAVA_OPTS=-Djenkins.install.runSetupWizard=false"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure init.groovy.d directory exists
+      file:
+        path: /var/lib/jenkins/init.groovy.d
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0755'
+
+    - name: Copy Groovy script to create brew user
+      copy:
+        dest: /var/lib/jenkins/init.groovy.d/create-brew-user.groovy
+        content: |
+          import jenkins.model.*
+          import hudson.security.*
+
+          def instance = Jenkins.getInstance()
+
+          def user = new HudsonPrivateSecurityRealm(true)
+          user.createAccount("brew", "password")
+          instance.setSecurityRealm(user)
+
+          def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+          instance.setAuthorizationStrategy(strategy)
+
+          instance.save()
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
+    - name: Reload systemd to apply the override
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart Jenkins service
       systemd:
         name: jenkins
-        state: started
+        state: restarted
         enabled: yes
+
+    - name: Install Git plugin in Jenkins
+      jenkins_plugin:
+        name: git
+        url_username: brew
+        url_password: password
+        state: present
+
+    - name: Install Docker plugin in Jenkins
+      jenkins_plugin:
+        name: docker-plugin
+        url_username: brew
+        url_password: password
+        state: present
+
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted
 
     - name: Open port 8080 for Jenkins
       ufw:
