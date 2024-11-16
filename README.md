@@ -29,7 +29,7 @@ Login into Azure:
 az login
 ```
 
-Go to `/cicd` folder and run Terraform:
+Go to `/iaac` folder and run Terraform:
 
 ```bash
 terraform init && terraform apply
