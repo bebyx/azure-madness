@@ -62,6 +62,14 @@
         group: jenkins
         mode: '0644'
 
+    - name: Copy Groovy script to remove default admin user
+      copy:
+        src: remove-default-admin.groovy
+        dest: /var/lib/jenkins/init.groovy.d/remove-default-admin.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
     - name: Reload systemd to apply the override
       systemd:
         daemon_reload: yes
