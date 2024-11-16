@@ -32,6 +32,18 @@ resource "local_file" "private_key_file" {
   file_permission = "0600" # Ensure the key file is secure
 }
 
+resource "random_password" "jenkins_admin_password" {
+  length           = 16
+  special          = true
+  override_special = "!@#$%&*"
+}
+
+resource "azurerm_key_vault_secret" "jenkins_admin_password" {
+  name         = "jenkins-admin-password"
+  value        = random_password.jenkins_admin_password.result
+  key_vault_id = var.key_vault_id
+}
+
 resource "terraform_data" "provision" {
   depends_on = [azurerm_linux_virtual_machine.vm,local_file.private_key_file]
 
@@ -39,6 +51,7 @@ resource "terraform_data" "provision" {
     command     = <<EOT
       ansible-playbook -i "${azurerm_linux_virtual_machine.vm.public_ip_address}," \
                        -e "ansible_user=${var.vm_username}" \
+                       -e "admin_password=${azurerm_key_vault_secret.jenkins_admin_password.value}" \
                        --private-key ./${var.pem_filename} \
                        jenkins.yml
     EOT
