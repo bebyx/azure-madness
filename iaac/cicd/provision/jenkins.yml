@@ -99,6 +99,14 @@
         name: jenkins
         state: restarted
 
+    - name: Clean up Groovy scripts
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/lib/jenkins/init.groovy.d/create-brew-user.groovy
+        - /var/lib/jenkins/init.groovy.d/remove-default-admin.groovy
+
     - name: Open port 8080 for Jenkins
       ufw:
         rule: allow
