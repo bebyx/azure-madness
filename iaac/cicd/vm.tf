@@ -49,9 +49,9 @@ resource "terraform_data" "provision" {
 
   provisioner "local-exec" {
     command     = <<EOT
-      ansible-playbook -i "${azurerm_linux_virtual_machine.vm.public_ip_address}," \
-                       -e "ansible_user=${var.vm_username}" \
-                       -e "admin_password=${azurerm_key_vault_secret.jenkins_admin_password.value}" \
+      ansible-playbook -i '${azurerm_linux_virtual_machine.vm.public_ip_address},' \
+                       -e 'ansible_user=${var.vm_username}' \
+                       -e 'admin_password=${azurerm_key_vault_secret.jenkins_admin_password.value}' \
                        --private-key ./${var.pem_filename} \
                        jenkins.yml
     EOT

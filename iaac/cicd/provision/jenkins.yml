@@ -54,24 +54,10 @@
         group: jenkins
         mode: '0755'
 
-    # Also remove default admin user and use generated password that is sent to key vault, too
     - name: Copy Groovy init script to create brew user
-      copy:
+      template:
+        src: create-brew-user.groovy.j2
         dest: /var/lib/jenkins/init.groovy.d/create-brew-user.groovy
-        content: |
-          import jenkins.model.*
-          import hudson.security.*
-
-          def instance = Jenkins.getInstance()
-
-          def user = new HudsonPrivateSecurityRealm(true)
-          user.createAccount("brew", "{{ admin_password }}")
-          instance.setSecurityRealm(user)
-
-          def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
-          instance.setAuthorizationStrategy(strategy)
-
-          instance.save()
         owner: jenkins
         group: jenkins
         mode: '0644'
