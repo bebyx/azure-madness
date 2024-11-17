@@ -1,0 +1,114 @@
+---
+- name: Install Jenkins on Azure VM
+  hosts: all
+  become: yes  # Use sudo to run tasks as root
+  tasks:
+
+    - name: Update apt repository cache
+      apt:
+        update_cache: yes
+
+    - name: Install Java (required by Jenkins)
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Download Jenkins repository key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+
+    - name: Add Jenkins repository with signed-by option
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Create systemd override directory for Jenkins
+      file:
+        path: /etc/systemd/system/jenkins.service.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create systemd override configuration to skip setup wizard
+      copy:
+        dest: /etc/systemd/system/jenkins.service.d/override.conf
+        content: |
+          [Service]
+          Environment="JAVA_OPTS=-Djenkins.install.runSetupWizard=false"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure init.groovy.d directory exists
+      file:
+        path: /var/lib/jenkins/init.groovy.d
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: '0755'
+
+    - name: Copy Groovy init script to create brew user
+      template:
+        src: create-brew-user.groovy.j2
+        dest: /var/lib/jenkins/init.groovy.d/create-brew-user.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
+    - name: Copy Groovy script to remove default admin user
+      copy:
+        src: remove-default-admin.groovy
+        dest: /var/lib/jenkins/init.groovy.d/remove-default-admin.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
+    - name: Reload systemd to apply the override
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart Jenkins service
+      systemd:
+        name: jenkins
+        state: restarted
+        enabled: yes
+
+    - name: Install Git plugin in Jenkins
+      jenkins_plugin:
+        name: git
+        url_username: brew
+        url_password: "{{ admin_password }}"
+        state: present
+
+    - name: Install Docker plugin in Jenkins
+      jenkins_plugin:
+        name: docker-plugin
+        url_username: brew
+        url_password: "{{ admin_password }}"
+        state: present
+
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted
+
+    - name: Clean up Groovy scripts
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/lib/jenkins/init.groovy.d/create-brew-user.groovy
+        - /var/lib/jenkins/init.groovy.d/remove-default-admin.groovy
+
+    - name: Open port 8080 for Jenkins
+      ufw:
+        rule: allow
+        port: 8080
+        proto: tcp
