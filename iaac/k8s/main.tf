@@ -110,9 +110,35 @@ resource "helm_release" "nginx_ingress" {
   version          = "4.11.3"
 
   set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path"
-    value = "/healthz"
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group"
+    value = var.resource_group_name
   }
+
+  set {
+    name  = "controller.service.loadBalancerIP"
+    value = azurerm_public_ip.nginx_static_ip.ip_address
+  }
+
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-dns-label-name"
+    value = "k8s"
+  }
+}
+
+resource "azurerm_public_ip" "nginx_static_ip" {
+  name                = "nginx-ingress-static-ip"
+  location            = var.resource_group_location
+  resource_group_name = var.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_dns_a_record" "nginx_ingress_a_record" {
+  name                = "k8s"
+  zone_name           = azurerm_dns_zone.aks_dns.name
+  resource_group_name = azurerm_dns_zone.aks_dns.resource_group_name
+  ttl                 = 3600
+  records             = [azurerm_public_ip.nginx_static_ip.ip_address]
 }
 
 output "dns_zone_id" {
