@@ -84,6 +84,37 @@ resource "azurerm_role_assignment" "dns_role_assignment" {
   scope                = azurerm_dns_zone.aks_dns.id
 }
 
+
+provider "kubernetes" {
+  host                   = azurerm_kubernetes_cluster.k8s.kube_config[0].host
+  client_certificate     = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].client_certificate)
+  client_key             = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].client_key)
+  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].cluster_ca_certificate)
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = azurerm_kubernetes_cluster.k8s.kube_config.0.host
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].client_certificate)
+    client_key             = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].client_key)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].cluster_ca_certificate)
+  }
+}
+
+resource "helm_release" "nginx_ingress" {
+  name             = "ingress-nginx"
+  namespace        = "ingress-nginx"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  create_namespace = true
+  version          = "4.11.3"
+
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path"
+    value = "/healthz"
+  }
+}
+
 output "dns_zone_id" {
   value = azurerm_dns_zone.aks_dns.id
 }

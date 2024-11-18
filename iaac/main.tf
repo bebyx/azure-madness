@@ -79,6 +79,8 @@ module "aks" {
   resource_group_id = data.azurerm_resource_group.custom_rg.id
   key_vault_id      = azurerm_key_vault.key_vault.id
   vnetwork_name     = azurerm_virtual_network.vnet.name
+  tenant_id   = data.azurerm_client_config.current.tenant_id
+  subscription_id = data.azurerm_client_config.current.subscription_id
 }
 
 output "vm_public_ip_from_module" {

@@ -26,3 +26,11 @@ variable "node_username" {
   type        = string
   default     = "azureuser"
 }
+
+variable "tenant_id" {
+  type = string
+}
+
+variable "subscription_id" {
+  type = string
+}
