@@ -88,3 +88,7 @@ output "vm_public_ip_from_module" {
 output "public_ssh" {
   value = module.jenkins.key_data
 }
+
+output "dns_zone_id" {
+  value = module.aks.dns_zone_id
+}

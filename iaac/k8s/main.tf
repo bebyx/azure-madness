@@ -27,13 +27,14 @@ resource "azurerm_subnet" "aks_subnet" {
 }
 
 resource azurerm_kubernetes_cluster k8s {
-  name                = "aks"
-  location            = var.resource_group_location
-  resource_group_name = var.resource_group_name
-  dns_prefix          = "aks-dns"
-  kubernetes_version  = data.azurerm_kubernetes_service_versions.current.latest_version
-
-  sku_tier = "Standard"
+  name                      = "aks"
+  location                  = var.resource_group_location
+  resource_group_name       = var.resource_group_name
+  dns_prefix                = "aks-dns"
+  kubernetes_version        = data.azurerm_kubernetes_service_versions.current.latest_version
+  sku_tier                  = "Standard"
+  workload_identity_enabled = true
+  oidc_issuer_enabled       = true
 
   identity {
     type = "SystemAssigned"
@@ -70,4 +71,19 @@ resource azurerm_kubernetes_cluster k8s {
     service_cidr      = "10.2.0.0/16"
     dns_service_ip    = "10.2.0.10"
   }
+}
+
+resource "azurerm_dns_zone" "aks_dns" {
+  name                = "artem-bebik.com"
+  resource_group_name = var.resource_group_name
+}
+
+resource "azurerm_role_assignment" "dns_role_assignment" {
+  principal_id         = azurerm_kubernetes_cluster.k8s.identity[0].principal_id
+  role_definition_name = "DNS Zone Contributor"
+  scope                = azurerm_dns_zone.aks_dns.id
+}
+
+output "dns_zone_id" {
+  value = azurerm_dns_zone.aks_dns.id
 }
