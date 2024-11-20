@@ -84,6 +84,11 @@ resource "azurerm_role_assignment" "dns_role_assignment" {
   scope                = azurerm_dns_zone.aks_dns.id
 }
 
+resource "azurerm_role_assignment" "aks_network_contributor" {
+  principal_id         = azurerm_kubernetes_cluster.k8s.identity[0].principal_id
+  role_definition_name = "Network Contributor"
+  scope                = var.resource_group_id
+}
 
 provider "kubernetes" {
   host                   = azurerm_kubernetes_cluster.k8s.kube_config[0].host
