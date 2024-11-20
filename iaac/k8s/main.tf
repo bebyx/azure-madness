@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~>3.0"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">=2.10"
+    }
     kubectl = {
       source  = "alekc/kubectl"
       version = ">= 2.0.2"
@@ -144,6 +148,7 @@ resource "azurerm_public_ip" "nginx_static_ip" {
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
+  domain_name_label   = "bebyx-ingress"
 }
 
 resource "azurerm_dns_a_record" "nginx_ingress_a_record" {
