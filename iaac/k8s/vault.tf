@@ -24,6 +24,8 @@ resource "helm_release" "csi_secrets_store" {
     name  = "syncSecret.enabled"
     value = "true"
   }
+
+  depends_on = [azurerm_key_vault.cluster_kv]
 }
 
 resource "time_sleep" "wait" {
