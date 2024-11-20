@@ -1,3 +1,8 @@
+resource "azurerm_dns_zone" "aks_dns" {
+  name                = "artem-bebik.com"
+  resource_group_name = var.resource_group_name
+}
+
 resource "azuread_application" "external_dns" {
   display_name = "aks-external-dns"
   owners       = [var.object_id]
@@ -80,13 +85,6 @@ resource "helm_release" "external_dns" {
   }
 }
 
-provider "kubectl" {
-  host                   = azurerm_kubernetes_cluster.k8s.kube_config[0].host
-  client_certificate     = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].client_certificate)
-  client_key             = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].client_key)
-  cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.k8s.kube_config[0].cluster_ca_certificate)
-  load_config_file       = false
-}
 
 module "cert_manager" {
   source = "terraform-iaac/cert-manager/kubernetes"
