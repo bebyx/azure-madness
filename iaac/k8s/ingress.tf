@@ -44,5 +44,5 @@ resource "azurerm_dns_a_record" "nginx_ingress_a_record" {
   zone_name           = azurerm_dns_zone.aks_dns.name
   resource_group_name = azurerm_dns_zone.aks_dns.resource_group_name
   ttl                 = 3600
-  records             = [azurerm_public_ip.nginx_static_ip.ip_address]
+  records             = [azurerm_public_ip.nginx_ingress_static_ip.ip_address]
 }
