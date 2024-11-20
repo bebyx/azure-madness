@@ -28,7 +28,7 @@ resource "azurerm_role_assignment" "external_dns_contributor" {
 resource "azurerm_role_assignment" "external_dns_reader" {
   principal_id         = azuread_service_principal.external_dns.object_id
   role_definition_name = "Reader"
-  scope                = azurerm_dns_zone.aks_dns.id
+  scope                = var.resource_group_id
 }
 
 resource "kubernetes_namespace" "external_dns" {
@@ -66,7 +66,7 @@ resource "helm_release" "external_dns" {
 
   set {
     name  = "azure.aadClientId"
-    value = azuread_service_principal.external_dns.id
+    value = azuread_service_principal.external_dns.client_id
   }
 
   set {
