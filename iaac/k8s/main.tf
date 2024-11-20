@@ -118,28 +118,28 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "nginx_ingress" {
-  name             = "ingress-nginx"
-  namespace        = "ingress-nginx"
-  repository       = "https://kubernetes.github.io/ingress-nginx"
-  chart            = "ingress-nginx"
-  create_namespace = true
-  version          = "4.11.3"
+module "nginx-controller" {
+  source  = "terraform-iaac/nginx-controller/helm"
 
-  set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group"
-    value = var.resource_group_name
-  }
+  ip_address = azurerm_public_ip.nginx_static_ip.ip_address
 
-  set {
-    name  = "controller.service.loadBalancerIP"
-    value = azurerm_public_ip.nginx_static_ip.ip_address
-  }
-
-  set {
-    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-dns-label-name"
-    value = "bebyx-ingress"
-  }
+  additional_set = [
+    {
+      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-resource-group"
+      value = var.resource_group_name
+      type  = "string"
+    },
+    {
+      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-dns-label-name"
+      value = "bebyx-ingress"
+      type  = "string"
+    },
+    {
+      name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/azure-load-balancer-health-probe-request-path"
+      value = "/healthz"
+      type  = "string"
+    }
+  ]
 }
 
 resource "azurerm_public_ip" "nginx_static_ip" {
