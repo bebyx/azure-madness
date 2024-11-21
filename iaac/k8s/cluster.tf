@@ -57,3 +57,11 @@ resource azurerm_kubernetes_cluster k8s {
     dns_service_ip    = "10.2.0.10"
   }
 }
+
+resource "azurerm_container_registry" "acr" {
+  name                = "bebyxRegistry"
+  resource_group_name = var.resource_group_name
+  location            = var.resource_group_location
+  sku                 = "Standard"
+  admin_enabled       = false
+}
