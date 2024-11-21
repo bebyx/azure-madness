@@ -1,3 +1,3 @@
-output "dns_zone_id" {
-  value = azurerm_dns_zone.aks_dns.id
+output "ingress_pip" {
+  value = azurerm_public_ip.nginx_ingress_static_ip.ip_address
 }

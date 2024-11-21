@@ -35,7 +35,7 @@ Go to `/iaac` folder and run Terraform:
 terraform init && terraform apply
 ```
 
-Once Jenkins is deployed, use VM public IP from the TF output in the web browser. The port is 8080.
+Once Jenkins is deployed, it should be available under URL: `http://jenkins.artem-bebik.com:8080`.
 Login with username `brew` and auto-generated password uploaded to Azure Key Vault as a secret with name `jenkins-admin-password`.
 
 ## App

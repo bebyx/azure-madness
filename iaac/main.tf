@@ -70,30 +70,36 @@ resource "azurerm_virtual_network" "vnet" {
   resource_group_name = data.azurerm_resource_group.custom_rg.name
 }
 
+resource "azurerm_dns_zone" "common" {
+  name                = "artem-bebik.com"
+  resource_group_name = data.azurerm_resource_group.custom_rg.name
+}
+
 module "jenkins" {
   source = "./cicd"
 
-  resource_group_id = data.azurerm_resource_group.custom_rg.id
-  key_vault_id      = azurerm_key_vault.key_vault.id
-  vnetwork_name     = azurerm_virtual_network.vnet.name
-
+  resource_group_id       = data.azurerm_resource_group.custom_rg.id
+  key_vault_id            = azurerm_key_vault.key_vault.id
+  vnetwork_name           = azurerm_virtual_network.vnet.name
   resource_group_location = local.location
+  dns_zone_name           = azurerm_dns_zone.common.name
 }
 
 module "aks" {
   source = "./k8s"
 
-  resource_group_id = data.azurerm_resource_group.custom_rg.id
-  key_vault_id      = azurerm_key_vault.key_vault.id
-  vnetwork_name     = azurerm_virtual_network.vnet.name
-  tenant_id         = data.azurerm_client_config.current.tenant_id
-  object_id         = data.azurerm_client_config.current.object_id
-  subscription_id   = data.azurerm_client_config.current.subscription_id
-
+  resource_group_id       = data.azurerm_resource_group.custom_rg.id
+  key_vault_id            = azurerm_key_vault.key_vault.id
+  vnetwork_name           = azurerm_virtual_network.vnet.name
+  tenant_id               = data.azurerm_client_config.current.tenant_id
+  object_id               = data.azurerm_client_config.current.object_id
+  subscription_id         = data.azurerm_client_config.current.subscription_id
   resource_group_location = local.location
+  dns_zone_id             = azurerm_dns_zone.common.id
+  dns_zone_name           = azurerm_dns_zone.common.name
 }
 
-output "vm_public_ip_from_module" {
+output "vm_public_ip" {
   value = module.jenkins.vm_ip
 }
 
@@ -101,6 +107,6 @@ output "public_ssh" {
   value = module.jenkins.key_data
 }
 
-output "dns_zone_id" {
-  value = module.aks.dns_zone_id
+output "ingress_pip" {
+  value = module.aks.ingress_pip
 }

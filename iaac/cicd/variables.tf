@@ -32,3 +32,7 @@ variable "pem_filename" {
   type        = string
   default     = "jenkins-server.pem"
 }
+
+variable "dns_zone_name" {
+  type = string
+}
