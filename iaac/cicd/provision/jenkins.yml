@@ -142,6 +142,13 @@
         url_password: "{{ admin_password }}"
         state: present
 
+    - name: Install Pipeline Stage View plugin in Jenkins
+      jenkins_plugin:
+        name: pipeline-stage-view
+        url_username: brew
+        url_password: "{{ admin_password }}"
+        state: present
+
     - name: Restart Jenkins
       service:
         name: jenkins
