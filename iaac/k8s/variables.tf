@@ -21,14 +21,20 @@ variable "key_vault_id" {
   type        = string
 }
 
-variable "vm_username" {
-  description = "Virtual Machine username"
+variable "node_username" {
+  description = "AKS node username"
   type        = string
   default     = "azureuser"
 }
 
-variable "pem_filename" {
-  description = "File name for Jenkins server private SSH key"
-  type        = string
-  default     = "jenkins-server.pem"
+variable "tenant_id" {
+  type = string
+}
+
+variable "object_id" {
+  type = string
+}
+
+variable "subscription_id" {
+  type = string
 }
