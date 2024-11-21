@@ -3,8 +3,11 @@
 node {
     checkout scm
 
+    // Define the workspace
+    def workspace = pwd()
+
     stage('Build') {
         def appImage = docker.build("app:${env.BUILD_ID}",
-                                    "-f ./app/Dockerfile ./app")
+                                    "-f ${workspace}/app/Dockerfile ${workspace}/app")
     }
 }
