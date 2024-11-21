@@ -80,6 +80,47 @@
         state: restarted
         enabled: yes
 
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository to apt sources
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | lower }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Ensure Docker is started and enabled to start on boot
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add Jenkins user to Docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    - name: Restart Jenkins to apply group changes
+      systemd:
+        name: jenkins
+        state: restarted
+
     - name: Install Git plugin in Jenkins
       jenkins_plugin:
         name: git
@@ -87,9 +128,9 @@
         url_password: "{{ admin_password }}"
         state: present
 
-    - name: Install Docker plugin in Jenkins
+    - name: Install Docker workflow in Jenkins
       jenkins_plugin:
-        name: docker-plugin
+        name: docker-workflow
         url_username: brew
         url_password: "{{ admin_password }}"
         state: present
