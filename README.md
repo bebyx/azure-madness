@@ -19,7 +19,7 @@ This is a test project implementing Jenkins, Kubernetes, and sample application 
 
 To deploy the app, Jenkins job will need to pass tests.
 
-## Deploy
+## Infra
 
 ### Deploy Jenkins and Kubernetes
 
@@ -38,3 +38,18 @@ terraform init && terraform apply
 Once Jenkins is deployed, use VM public IP from the TF output in the web browser. The port is 8080.
 Login with username `brew` and auto-generated password uploaded to Azure Key Vault as a secret with name `jenkins-admin-password`.
 
+## App
+
+You can run the app locally in Docker. Just build the image:
+
+```bash
+docker build -t spring-boot-app .
+```
+
+And then run it:
+
+```bash
+docker run -d -p 8080:8080 spring-boot-app
+```
+
+The website will be available under `http://localhost:8080`.
