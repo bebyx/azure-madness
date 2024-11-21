@@ -3,11 +3,22 @@
 node {
     checkout scm
 
+    final acrCredId = 'ACR_CREDS'
+
     // Define the workspace
     def workspace = pwd()
+    def appImage
 
-    stage('Build') {
-        def appImage = docker.build("app:${env.BUILD_ID}",
+    stage('Build app image') {
+        appImage = docker.build("app:${env.BUILD_ID}",
                                     "-f ${workspace}/app/Dockerfile ${workspace}/app")
+    }
+
+    stage('Push app image to ACR') {
+        // Login to Azure Container Registry
+        docker.withRegistry('https://bebyxregistry.azurecr.io', acrCredId) {
+            // Push image
+            appImage.push()
+        }
     }
 }
