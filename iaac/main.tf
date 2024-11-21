@@ -110,3 +110,11 @@ output "public_ssh" {
 output "ingress_pip" {
   value = module.aks.ingress_pip
 }
+
+output "acr_client_id" {
+  value = module.aks.acr_client_id
+}
+
+output "acr" {
+  value = module.aks.acr
+}
