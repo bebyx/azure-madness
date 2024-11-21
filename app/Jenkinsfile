@@ -1,21 +1,10 @@
-pipeline {
-    agent any
+#!/usr/bin/env groovy
 
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building..'
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
-            }
-        }
+node {
+    checkout scm
+
+    stage('Build') {
+        def appImage = docker.build("app:${env.BUILD_ID}",
+                                    "-f ./app/Dockerfile ./app")
     }
 }
