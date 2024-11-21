@@ -94,6 +94,13 @@
         url_password: "{{ admin_password }}"
         state: present
 
+    - name: Install Pipeline plugin in Jenkins
+      jenkins_plugin:
+        name: workflow-aggregator
+        url_username: brew
+        url_password: "{{ admin_password }}"
+        state: present
+
     - name: Restart Jenkins
       service:
         name: jenkins
