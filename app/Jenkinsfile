@@ -49,4 +49,8 @@ node {
             kubectl apply -f ingress.yaml
         """
     }
+
+    stage('Deploy HPA for the app') {
+        sh "cd ${workspace}/app/k8s && kubectl apply -f hpa.yaml"
+    }
 }
