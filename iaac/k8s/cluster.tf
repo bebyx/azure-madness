@@ -67,6 +67,13 @@ resource "azurerm_container_registry" "acr" {
 
 }
 
+resource "azurerm_role_assignment" "acr_pull" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.k8s.kubelet_identity[0].object_id
+}
+
+
 resource "azuread_application" "acr" {
   display_name = "registry"
   owners       = [var.object_id]
