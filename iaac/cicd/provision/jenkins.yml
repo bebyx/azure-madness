@@ -175,6 +175,19 @@
         name: jenkins
         state: restarted
 
+    - name: Copy Groovy init script to create app job
+      template:
+        src: create-app-job.groovy
+        dest: /var/lib/jenkins/init.groovy.d/create-app-job.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted
+
     - name: Clean up Groovy scripts
       file:
         path: "{{ item }}"
