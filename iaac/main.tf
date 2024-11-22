@@ -117,6 +117,14 @@ output "acr_client_id" {
   value = module.aks.acr_sp_client_id
 }
 
+output "tenant_id" {
+  value = data.azurerm_client_config.current.tenant_id
+}
+
+output "aks_client_id" {
+  value = module.aks.aks_sp_client_id
+}
+
 output "acr" {
   value = module.aks.acr
 }
