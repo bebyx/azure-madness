@@ -4,6 +4,8 @@ node {
     checkout scm
 
     final acrCredId = 'ACR_CREDS'
+    final aksCredId = 'AKS_CREDS'
+    final tenantCredId = 'TENANT_ID'
 
     // Define the workspace
     def workspace = pwd()
@@ -26,13 +28,25 @@ node {
     stage('Login into AZ as AKS User') {
         withCredentials([
                 usernamePassword(
-                        credentialsId: 'AKS_CREDS',
+                        credentialsId: aksCredId,
                         usernameVariable: 'AKS_USERNAME',
                         passwordVariable: 'AKS_PASSWORD'),
-                string(credentialsId: 'TENANT_ID', variable: 'TENANT_ID')
+                string(credentialsId: tenantCredId, variable: 'TENANT_ID')
         ]) {
             sh 'az login --service-principal -u $AKS_USERNAME -p $AKS_PASSWORD --tenant $TENANT_ID'
-            sh 'az aks get-credentials --resource-group Artem-Candidate --name aks'
         }
+    }
+
+    stage('Get AKS creds') {
+        sh 'az aks get-credentials --resource-group Artem-Candidate --name aks'
+    }
+
+    stage('Deploy app to k8s') {
+        sh """
+            cd ${workspace}/app/k8s
+            kubectl apply -f deployment.yaml
+            kubectl apply -f service.yaml
+            kubectl apply -f ingress.yaml
+        """
     }
 }
