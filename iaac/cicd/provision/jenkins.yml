@@ -70,6 +70,15 @@
         group: jenkins
         mode: '0644'
 
+    - name: Copy Groovy init script to add ACR creds
+      template:
+        src: create-acr-creds.groovy.j2
+        dest: /var/lib/jenkins/init.groovy.d/create-acr-creds.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
+
     - name: Reload systemd to apply the override
       systemd:
         daemon_reload: yes

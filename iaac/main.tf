@@ -83,6 +83,8 @@ module "jenkins" {
   vnetwork_name           = azurerm_virtual_network.vnet.name
   resource_group_location = local.location
   dns_zone_name           = azurerm_dns_zone.common.name
+  acr_sp_id               = module.aks.acr_sp_client_id
+  acr_sp_password         = module.aks.acr_sp_password
 }
 
 module "aks" {
@@ -112,7 +114,7 @@ output "ingress_pip" {
 }
 
 output "acr_client_id" {
-  value = module.aks.acr_client_id
+  value = module.aks.acr_sp_client_id
 }
 
 output "acr" {

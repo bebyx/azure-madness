@@ -36,3 +36,11 @@ variable "pem_filename" {
 variable "dns_zone_name" {
   type = string
 }
+
+variable "acr_sp_id" {
+  type = string
+}
+
+variable "acr_sp_password" {
+  type = string
+}

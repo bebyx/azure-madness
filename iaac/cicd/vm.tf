@@ -52,6 +52,8 @@ resource "terraform_data" "provision" {
       ansible-playbook -i '${azurerm_linux_virtual_machine.vm.public_ip_address},' \
                        -e 'ansible_user=${var.vm_username}' \
                        -e 'admin_password=${azurerm_key_vault_secret.jenkins_admin_password.value}' \
+                       -e 'acr_sp_id=${var.acr_sp_id}' \
+                       -e 'acr_sp_password=${var.acr_sp_password}' \
                        --private-key ./${var.pem_filename} \
                        jenkins.yml
     EOT
