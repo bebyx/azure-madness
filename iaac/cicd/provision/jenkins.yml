@@ -70,18 +70,10 @@
         group: jenkins
         mode: '0644'
 
-    - name: Copy Groovy init script to add ACR creds
+    - name: Copy Groovy init script to add creds
       template:
-        src: create-acr-creds.groovy.j2
-        dest: /var/lib/jenkins/init.groovy.d/create-acr-creds.groovy
-        owner: jenkins
-        group: jenkins
-        mode: '0644'
-
-    - name: Copy Groovy init script to add AKS creds
-      template:
-        src: create-aks-creds.groovy.j2
-        dest: /var/lib/jenkins/init.groovy.d/create-aks-creds.groovy
+        src: create-creds.groovy.j2
+        dest: /var/lib/jenkins/init.groovy.d/create-creds.groovy
         owner: jenkins
         group: jenkins
         mode: '0644'
