@@ -85,6 +85,9 @@ module "jenkins" {
   dns_zone_name           = azurerm_dns_zone.common.name
   acr_sp_id               = module.aks.acr_sp_client_id
   acr_sp_password         = module.aks.acr_sp_password
+  aks_sp_id               = module.aks.aks_sp_client_id
+  aks_sp_password         = module.aks.aks_sp_password
+  tenant_id               = data.azurerm_client_config.current.tenant_id
 }
 
 module "aks" {
@@ -115,10 +118,6 @@ output "ingress_pip" {
 
 output "acr_client_id" {
   value = module.aks.acr_sp_client_id
-}
-
-output "tenant_id" {
-  value = data.azurerm_client_config.current.tenant_id
 }
 
 output "aks_client_id" {

@@ -44,3 +44,15 @@ variable "acr_sp_id" {
 variable "acr_sp_password" {
   type = string
 }
+
+variable "aks_sp_id" {
+  type = string
+}
+
+variable "aks_sp_password" {
+  type = string
+}
+
+variable "tenant_id" {
+  type = string
+}

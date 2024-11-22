@@ -78,6 +78,13 @@
         group: jenkins
         mode: '0644'
 
+    - name: Copy Groovy init script to add AKS creds
+      template:
+        src: create-aks-creds.groovy.j2
+        dest: /var/lib/jenkins/init.groovy.d/create-aks-creds.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
 
     - name: Reload systemd to apply the override
       systemd:
@@ -129,6 +136,19 @@
       systemd:
         name: jenkins
         state: restarted
+
+    - name: Install Azure CLI
+      shell: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      args:
+        creates: /usr/bin/az
+
+    - name: Download kubectl binary
+      shell: |
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.23.0/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin
+      args:
+        creates: /usr/local/bin/kubectl
 
     - name: Install Git plugin in Jenkins
       jenkins_plugin:
