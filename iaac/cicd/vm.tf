@@ -2,7 +2,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   name                = "jenkins-vm"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
-  size                = "Standard_DS1_v2"
+  size                = "Standard_DS2_v2"
   admin_username      = var.vm_username
 
   admin_ssh_key {
@@ -45,13 +45,18 @@ resource "azurerm_key_vault_secret" "jenkins_admin_password" {
 }
 
 resource "terraform_data" "provision" {
-  depends_on = [azurerm_linux_virtual_machine.vm,local_file.private_key_file]
+  depends_on       = [azurerm_linux_virtual_machine.vm, local_file.private_key_file]
 
   provisioner "local-exec" {
     command     = <<EOT
       ansible-playbook -i '${azurerm_linux_virtual_machine.vm.public_ip_address},' \
                        -e 'ansible_user=${var.vm_username}' \
                        -e 'admin_password=${azurerm_key_vault_secret.jenkins_admin_password.value}' \
+                       -e 'acr_sp_id=${var.acr_sp_id}' \
+                       -e 'acr_sp_password=${var.acr_sp_password}' \
+                       -e 'aks_sp_id=${var.aks_sp_id}' \
+                       -e 'aks_sp_password=${var.aks_sp_password}' \
+                       -e 'tenant_id=${var.tenant_id}' \
                        --private-key ./${var.pem_filename} \
                        jenkins.yml
     EOT

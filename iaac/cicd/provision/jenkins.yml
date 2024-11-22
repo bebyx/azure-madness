@@ -70,6 +70,14 @@
         group: jenkins
         mode: '0644'
 
+    - name: Copy Groovy init script to add creds
+      template:
+        src: create-creds.groovy.j2
+        dest: /var/lib/jenkins/init.groovy.d/create-creds.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
     - name: Reload systemd to apply the override
       systemd:
         daemon_reload: yes
@@ -80,6 +88,60 @@
         state: restarted
         enabled: yes
 
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository to apt sources
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | lower }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Ensure Docker is started and enabled to start on boot
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add Jenkins user to Docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    - name: Restart Jenkins to apply group changes
+      systemd:
+        name: jenkins
+        state: restarted
+
+    - name: Install Azure CLI
+      shell: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      args:
+        creates: /usr/bin/az
+
+    - name: Download kubectl binary
+      shell: |
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.23.0/bin/linux/amd64/kubectl
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin
+      args:
+        creates: /usr/local/bin/kubectl
+
     - name: Install Git plugin in Jenkins
       jenkins_plugin:
         name: git
@@ -87,9 +149,23 @@
         url_password: "{{ admin_password }}"
         state: present
 
-    - name: Install Docker plugin in Jenkins
+    - name: Install Docker workflow in Jenkins
       jenkins_plugin:
-        name: docker-plugin
+        name: docker-workflow
+        url_username: brew
+        url_password: "{{ admin_password }}"
+        state: present
+
+    - name: Install Pipeline plugin in Jenkins
+      jenkins_plugin:
+        name: workflow-aggregator
+        url_username: brew
+        url_password: "{{ admin_password }}"
+        state: present
+
+    - name: Install Pipeline Stage View plugin in Jenkins
+      jenkins_plugin:
+        name: pipeline-stage-view
         url_username: brew
         url_password: "{{ admin_password }}"
         state: present
@@ -99,13 +175,28 @@
         name: jenkins
         state: restarted
 
+    - name: Copy Groovy init script to create app job
+      template:
+        src: create-app-job.groovy
+        dest: /var/lib/jenkins/init.groovy.d/create-app-job.groovy
+        owner: jenkins
+        group: jenkins
+        mode: '0644'
+
+    - name: Restart Jenkins
+      service:
+        name: jenkins
+        state: restarted
+
     - name: Clean up Groovy scripts
       file:
-        path: "{{ item }}"
+        path: "/var/lib/jenkins/init.groovy.d/{{ item }}"
         state: absent
       loop:
-        - /var/lib/jenkins/init.groovy.d/create-brew-user.groovy
-        - /var/lib/jenkins/init.groovy.d/remove-default-admin.groovy
+        - create-brew-user.groovy
+        - remove-default-admin.groovy
+        - create-creds.groovy
+        - create-app-job.groovy
 
     - name: Open port 8080 for Jenkins
       ufw:

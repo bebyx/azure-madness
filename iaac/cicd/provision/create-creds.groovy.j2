@@ -1,0 +1,70 @@
+import jenkins.model.Jenkins
+import com.cloudbees.plugins.credentials.domains.Domain
+import com.cloudbees.plugins.credentials.CredentialsScope
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl
+import hudson.util.Secret
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl
+
+def domain = Domain.global() // Global scope
+def store = Jenkins.instance.getExtensionList(
+    'com.cloudbees.plugins.credentials.SystemCredentialsProvider'
+)[0].getStore()
+
+// Define credential details
+def usernamePasswordCredentials = [
+    [
+        id: 'ACR_CREDS',
+        description: "ACR Service Principal credentials",
+        username: '{{ acr_sp_id }}',
+        password: '{{ acr_sp_password }}'
+    ],
+    [
+        id: 'AKS_CREDS',
+        description: "AKS Service Principal credentials",
+        username: '{{ aks_sp_id }}',
+        password: '{{ aks_sp_password }}'
+    ]
+]
+
+def stringCredentials = [
+    [
+        id: 'TENANT_ID',
+        description: "Azure Tenant ID",
+        value: '{{ tenant_id }}'
+    ]
+]
+
+// Add Username/Password Credentials
+usernamePasswordCredentials.each { cred ->
+    def existingCred = store.getCredentials(domain).find { it.id == cred.id }
+    if (existingCred == null) {
+        def newCred = new UsernamePasswordCredentialsImpl(
+            CredentialsScope.GLOBAL,
+            cred.id,
+            cred.description,
+            cred.username,
+            cred.password
+        )
+        store.addCredentials(domain, newCred)
+        println "Credential with ID '${cred.id}' created successfully."
+    } else {
+        println "Credential with ID '${cred.id}' already exists."
+    }
+}
+
+// Add String Credentials
+stringCredentials.each { cred ->
+    def existingCred = store.getCredentials(domain).find { it.id == cred.id }
+    if (existingCred == null) {
+        def newCred = new StringCredentialsImpl(
+            CredentialsScope.GLOBAL,
+            cred.id,
+            cred.description,
+            Secret.fromString(cred.value)
+        )
+        store.addCredentials(domain, newCred)
+        println "Credential with ID '${cred.id}' created successfully."
+    } else {
+        println "Credential with ID '${cred.id}' already exists."
+    }
+}

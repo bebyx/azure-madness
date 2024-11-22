@@ -8,6 +8,7 @@ This is a test project implementing Jenkins, Kubernetes, and sample application 
 - Azure CLI
 - Terraform
 - Ansible
+- Docker (optional for running app locally)
 
 ## Structure
 
@@ -35,10 +36,12 @@ Go to `/iaac` folder and run Terraform:
 terraform init && terraform apply
 ```
 
-Once Jenkins is deployed, use VM public IP from the TF output in the web browser. The port is 8080.
+Once Jenkins is deployed, it should be available under URL: `http://jenkins.artem-bebik.com:8080`.
 Login with username `brew` and auto-generated password uploaded to Azure Key Vault as a secret with name `jenkins-admin-password`.
 
 ## App
+
+### Run locally
 
 You can run the app locally in Docker. Just build the image:
 
@@ -53,3 +56,10 @@ docker run -d -p 8080:8080 spring-boot-app
 ```
 
 The website will be available under `http://localhost:8080`.
+
+### Deploy to AKS with Jenkins
+
+Jenkins should create the `app` deployment job upon provision.
+In case needed to create the job manually, choose Jenkins Pipeline with source to this repo and proper Jenkinsfile path: `app/Jenkinsfile`.
+
+Run the job and let ir finish. Wait a minute or so for cert to be created. Check at `https://app.artem-bebik.com`.

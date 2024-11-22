@@ -38,3 +38,11 @@ variable "object_id" {
 variable "subscription_id" {
   type = string
 }
+
+variable "dns_zone_id" {
+  type = string
+}
+
+variable "dns_zone_name" {
+  type = string
+}

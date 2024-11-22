@@ -25,5 +25,13 @@ resource "azurerm_public_ip" "jenkins_pip" {
   name                = "jenkins-public-ip"
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+}
+
+resource "azurerm_dns_a_record" "jenkins_a_record" {
+  name                = "jenkins"
+  zone_name           = var.dns_zone_name
+  resource_group_name = var.resource_group_name
+  ttl                 = 3600
+  records             = [azurerm_linux_virtual_machine.vm.public_ip_address]
 }

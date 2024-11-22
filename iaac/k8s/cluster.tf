@@ -58,10 +58,30 @@ resource azurerm_kubernetes_cluster k8s {
   }
 }
 
-resource "azurerm_container_registry" "acr" {
-  name                = "bebyxRegistry"
-  resource_group_name = var.resource_group_name
-  location            = var.resource_group_location
-  sku                 = "Standard"
-  admin_enabled       = false
+resource "azuread_application" "aks" {
+  display_name = "kubernetes"
+  owners       = [var.object_id]
+}
+
+resource "azuread_service_principal" "aks_sp" {
+  client_id                    = azuread_application.aks.client_id
+  app_role_assignment_required = false
+  owners                       = [var.object_id]
+}
+
+resource "azuread_service_principal_password" "aks_sp_secret" {
+  service_principal_id = azuread_service_principal.aks_sp.id
+  end_date             = "2025-01-01T00:00:00Z"
+}
+
+resource "azurerm_role_assignment" "aks_sp_contributor" {
+  principal_id         = azuread_service_principal.aks_sp.object_id
+  role_definition_name = "Azure Kubernetes Service Cluster User Role"
+  scope                = azurerm_kubernetes_cluster.k8s.id
+}
+
+resource "azurerm_key_vault_secret" "aks_client_secret" {
+  name         = "aks-client-secret"
+  value        = azuread_service_principal_password.aks_sp_secret.value
+  key_vault_id = var.key_vault_id
 }

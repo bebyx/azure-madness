@@ -32,3 +32,27 @@ variable "pem_filename" {
   type        = string
   default     = "jenkins-server.pem"
 }
+
+variable "dns_zone_name" {
+  type = string
+}
+
+variable "acr_sp_id" {
+  type = string
+}
+
+variable "acr_sp_password" {
+  type = string
+}
+
+variable "aks_sp_id" {
+  type = string
+}
+
+variable "aks_sp_password" {
+  type = string
+}
+
+variable "tenant_id" {
+  type = string
+}

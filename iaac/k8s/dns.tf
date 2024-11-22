@@ -1,8 +1,3 @@
-resource "azurerm_dns_zone" "aks_dns" {
-  name                = "artem-bebik.com"
-  resource_group_name = var.resource_group_name
-}
-
 resource "azuread_application" "external_dns" {
   display_name = "aks-external-dns"
   owners       = [var.object_id]
@@ -22,7 +17,7 @@ resource "azuread_service_principal_password" "external_dns_sp_secret" {
 resource "azurerm_role_assignment" "external_dns_contributor" {
   principal_id         = azuread_service_principal.external_dns.object_id
   role_definition_name = "DNS Zone Contributor"
-  scope                = azurerm_dns_zone.aks_dns.id
+  scope                = var.dns_zone_id
 }
 
 resource "azurerm_role_assignment" "external_dns_reader" {
