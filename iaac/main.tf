@@ -33,7 +33,7 @@ locals {
 }
 
 resource "azurerm_key_vault" "key_vault" {
-  name                = "bebyx-secrets-v2"
+  name                = "bebyx-common-kv"
   location            = local.location
   resource_group_name = data.azurerm_resource_group.custom_rg.name
 
