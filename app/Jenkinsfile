@@ -22,4 +22,17 @@ node {
             appImage.push('latest')
         }
     }
+
+    stage('Login into AZ as AKS User') {
+        withCredentials([
+                usernamePassword(
+                        credentialsId: 'AKS_CREDS',
+                        usernameVariable: 'AKS_USERNAME',
+                        passwordVariable: 'AKS_PASSWORD'),
+                string(credentialsId: 'TENANT_ID', variable: 'TENANT_ID')
+        ]) {
+            sh 'az login --service-principal -u $AKS_USERNAME -p $AKS_PASSWORD --tenant $TENANT_ID'
+            sh 'az aks get-credentials --resource-group Artem-Candidate --name aks'
+        }
+    }
 }
